@@ -44,7 +44,7 @@ Follow these steps to understand and run this repository.
    Train the UAV trajectory and beamforming optimization using:
    ```bash
    python3 main_test.py
-2. Train with Reference Parameters(Without UAV)
+2. Train with Reference Parameters(Without IRS)
    To compare different DRL parameter settings, run:
    ```bash
    python3 main_ref.py
