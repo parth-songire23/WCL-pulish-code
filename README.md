@@ -38,43 +38,16 @@ Follow these steps to understand and run this repository.
    ```bash
    pip install -r requirements.txt
 
-   
-### Step 2: Understanding the Code
-1. Test UAV-RIS Communication
-   Run test_channel.py to verify that the UAV and RIS communicate correctly:
 
-   ```bash
-   python3 test_channel.py
-2. Visualize the UAV-RIS-Jammer System
-   Run render.py to generate a 3D visualization of the system:
-   ```bash
-   python3 render.py
-3. Analyze Existing Results
-   Run load_and_plot.py to plot stored simulation results:
-   ```bash
-   python3 load_and_plot.py --path ./data/storage/
-
-
-### Step 3: Training the DRL Model
+### Step 2: Training the DRL Model
 1. Train the DRL Model
    Train the UAV trajectory and beamforming optimization using:
    ```bash
    python3 main_test.py
-2. Train with Reference Parameters
+2. Train with Reference Parameters(Without UAV)
    To compare different DRL parameter settings, run:
    ```bash
    python3 main_ref.py
-3. Run RIS-Specific Testing
-   To analyze the effect of RIS on UAV communication:
-   ```bash
-   python3 main_RIS.py
 
 
-### Step 4: Running Simulations on Trained Models
-1. Run Simulations Using Trained Models
-   ```bash
-   python3 run_simulation.py --path data/storage/scratch/
-2. Evaluate DRL Model Performance in Batch Mode
-   ```bash
-   bash batch_eval.sh
 
