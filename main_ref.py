@@ -1,70 +1,80 @@
-from ddpg import Agent
-from env import minimal_IRS_system
-import numpy as np
-#from utils import plotLearning
-import matplotlib.pyplot as plt
 import os
-os.environ["KMP_DUPLICATE_LIB_OK"]="TRUE"
+import numpy as np
+import matplotlib.pyplot as plt
+from env import minimal_IRS_system
+from ddpg import Agent
 
-IRS_system = minimal_IRS_system(K = 1)
-K = IRS_system.K
-M = IRS_system.M
-N = IRS_system.N
+# Fix duplicate library issue
+os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
+
+# 1. Initialize IRS System with Jammers
+IRS_system = minimal_IRS_system(K=1)
+K, M, N = IRS_system.K, IRS_system.M, IRS_system.N
+
+# 2. Define RL State & Action Dimensions
 RL_state_dims = 2*K + 2*K**2 + 2*N + 2*M*K + 2*N*M + 2*K*N
 RL_input_dims = RL_state_dims
 RL_action_dims = 2 * (M * K) + N
 
-steps_per_ep = 200
-alpha_actor_learning_rate = 0.001
-beta_critic_learning_rate = 0.001
-agent = Agent(alpha=alpha_actor_learning_rate, beta=beta_critic_learning_rate, input_dims=[RL_input_dims], tau=0.001, env=IRS_system,
-              batch_size=64,  layer1_size=400 * 2, layer2_size=300 * 2, n_actions=RL_action_dims)
+# 3. Initialize DRL Agent
+agent = Agent(
+    alpha=0.001, beta=0.001, input_dims=[RL_input_dims], tau=0.001,
+    env=IRS_system, batch_size=64, layer1_size=800, layer2_size=600,
+    n_actions=RL_action_dims
+)
 
+# 4. Training Parameters
+episode_num = 1000
+steps_per_ep = 200
 scores = []
-for i in range(1000):
+
+# 5. Training Loop
+for i in range(episode_num):
     observersion = IRS_system.reset()
     done = False
-    done_sys = False
     score = 0
-    cnt_in_one_epi = 0
     best_bit_per_Hz = 0
-    draw_bit_rate_list = []
-    draw_tran_power_list = []
-    #draw_bit_rate_one_element = {'if_exceed_max_power':False,'bit_rate' : 0}
-    while not done:
-        cnt_in_one_epi += 1
-        if cnt_in_one_epi > 500:
-            done = True
+    bit_rate_list, power_list = [], []
+    
+    for step in range(500):  # Prevent infinite loops
         action = agent.choose_action(observersion)
-        new_state, reward, done_sys , info = IRS_system.step(action)
+        new_state, reward, done_sys, jamming_effect = IRS_system.step(action)
 
-        bit_per_Hz = IRS_system.calculate_data_rate()   
-        #draw_bit_rate_one_element['bit_rate'] = bit_per_Hz 
-        #draw_bit_rate_one_element['if_exceed_max_power']=done_sys
-        draw_bit_rate_list.append(bit_per_Hz)
-
+        # Store performance metrics
+        bit_per_Hz = IRS_system.calculate_data_rate()
         total_power = IRS_system.calculate_total_transmit_power()
-        draw_tran_power_list.append(total_power)
-        if done_sys == False:# if not exceed max transmit power            
-            if bit_per_Hz > best_bit_per_Hz:
-                best_bit_per_Hz = bit_per_Hz
-        agent.remember(observersion, action, reward, new_state, int(done))
+        bit_rate_list.append(bit_per_Hz)
+        power_list.append(total_power)
+
+        # Store best data rate while staying within power limits
+        if not done_sys and bit_per_Hz > best_bit_per_Hz:
+            best_bit_per_Hz = bit_per_Hz
+
+        # Store experience (including jamming effect)
+        agent.remember(observersion, action, reward, new_state, int(done_sys), jamming_effect)
         agent.learn()
+
         score += reward
         observersion = new_state
-        IRS_system.render()
+
+        if done_sys:
+            break
+
+    # 6. Plot & Save Episode Results
     plt.cla()
-    plt.plot(range(len(draw_bit_rate_list)), draw_bit_rate_list, color = 'green')
-    plt.plot(range(len(draw_tran_power_list)), draw_tran_power_list, color = 'red')
+    plt.plot(bit_rate_list, color="green", label="Bit Rate (bits/s/Hz)")
+    plt.plot(power_list, color="red", label="Total Power (W)")
+    plt.legend()
+    
+    save_path = os.path.join(os.getcwd(), "results", f"episode_{i}.png")
+    plt.savefig(save_path)
 
-    # plt.show()
-    filename_i =os.path.abspath(os.curdir) + '\\main_foder\\image_result\\' + str(i) + '.png'
-    plt.savefig(filename_i)
     scores.append(score)
-    #if i % 25 == 0:
-        #agent.save_models()
 
-    print('episode ', i, 'score %.2f' % score, 'best sum rate %.3f bit/s/Hz' % best_bit_per_Hz,
-          'trailing 100 games avg %.4f' % np.mean(scores[-100:]))
-filename = 'C:\\demo\\IRS_DDPG_minimal\\main_foder\\LunarLander-alpha000025-beta00025-400-300.png'
-# plotLearning(scores, filename, window=100)
+    # 7. Log Training Progress
+    print(f"Episode {i}: Score = {score:.2f} | Best Sum Rate = {best_bit_per_Hz:.3f} bits/s/Hz | "
+          f"Avg Last 100 = {np.mean(scores[-100:]):.4f}")
+
+    # 8. Save Model Every 50 Episodes
+    if i % 50 == 0 and i != 0:
+        agent.save_models()
