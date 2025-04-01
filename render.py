@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from mpl_toolkits.mplot3d import Axes3D
 from matplotlib.patches import FancyArrowPatch
-from mpl_toolkits.mplot3d import proj3d
+from mpl_toolkits.mplot3d.art3d import Line3DCollection
 
 class Arrow3D(FancyArrowPatch):
     """
@@ -15,7 +15,7 @@ class Arrow3D(FancyArrowPatch):
     def draw(self, renderer):
         """Transform 3D coordinates to 2D projection for rendering."""
         xs3d, ys3d, zs3d = self._verts3d
-        xs, ys, zs = proj3d.proj_transform(xs3d, ys3d, zs3d, renderer.M)
+        xs, ys, zs = renderer.transform_3d(xs3d, ys3d, zs3d)
         self.set_positions((xs[0], ys[0]), (xs[1], ys[1]))
         super().draw(renderer)
 
@@ -49,6 +49,7 @@ class Render:
         self._plot_entities(ax)
         self._plot_channels(ax)
         self._plot_text(ax)
+        plt.draw()
 
     def _setup_3D_plot(self):
         """Initialize the 3D plot settings."""
@@ -87,16 +88,13 @@ class Render:
 
     def _draw_arrow(self, ax, channel, color):
         """Helper function to draw 3D arrows representing wireless channels."""
-        start, end = channel.transmitter.coordinate, channel.receiver.coordinate
-        ax.text(
-            *(np.mean([start, end], axis=0)),
-            f"{channel.channel_name}\nPL: {channel.path_loss_normal:.2f} dB",
-            size=8, color=color
-        )
-        ax.add_artist(Arrow3D(
-            [start[0], end[0]], [start[1], end[1]], [start[2], end[2]],
-            mutation_scale=15, lw=2, arrowstyle="-|>", color=color
-        ))
+        start, end = np.array(channel.transmitter.coordinate), np.array(channel.receiver.coordinate)
+        mid = (start + end) / 2
+        
+        ax.text(*mid, f"{channel.channel_name}\nPL: {channel.path_loss_normal:.2f} dB", size=8, color=color)
+        
+        line = Line3DCollection([list(zip(start, end))], colors=color, linewidths=2)
+        ax.add_collection3d(line)
 
     def _plot_text(self, ax):
         """Display simulation information in the 3D space."""
