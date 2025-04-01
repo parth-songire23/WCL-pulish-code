@@ -40,7 +40,7 @@ class mmWave_channel:
         distance = np.linalg.norm(self.transmitter.coordinate - self.receiver.coordinate)
         path_loss_dB = -20 * math.log10(4 * math.pi * self.frequency / 3e8) - 10 * self.n * math.log10(distance)
         shadowing = np.random.normal() * self.sigma
-        return normal_to_dB(path_loss_dB - shadowing)
+        return dB_to_normal(path_loss_dB - shadowing)
 
     def get_estimated_channel_matrix(self):
         """Computes estimated channel matrix for mmWave propagation."""
