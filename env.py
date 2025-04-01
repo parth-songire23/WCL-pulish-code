@@ -12,7 +12,7 @@ from data_manager import DataManager
 # Set random seed for reproducibility
 np.random.seed(2)
 
-class MiniSystem(object):
+class MiniSystem:
     """
     Defines the UAV-RIS communication system with:
     - UAV (Optimizing Beamforming)
@@ -53,9 +53,9 @@ class MiniSystem(object):
             ant_num=UAV_ant_num,
             max_movement_per_time_slot=0.25
         )
-        self.UAV.G = np.mat(np.ones((self.UAV.ant_num, user_num), dtype=complex), dtype=complex)
+        self.UAV.G = np.ones((self.UAV.ant_num, user_num), dtype=np.complex128)
         self.power_factor = 100
-        self.UAV.G_Pmax = np.trace(self.UAV.G * self.UAV.G.H) * self.power_factor
+        self.UAV.G_Pmax = np.trace(self.UAV.G @ self.UAV.G.conj().T) * self.power_factor
 
         # 2. Initialize RIS
         self.RIS = RIS(
@@ -114,17 +114,17 @@ class MiniSystem(object):
         noise_power = self.user_list[k].noise_power
         h_U_k = self.h_U_k[k].channel_matrix
         h_R_k = self.h_R_k[k].channel_matrix
-        Psi = diag_to_vector(self.RIS.Phi)
-        H_c = vector_to_diag(h_R_k).H * self.H_UR.channel_matrix
+        Psi = np.diag(self.RIS.Phi)
+        H_c = np.diag(h_R_k).conj().T @ self.H_UR.channel_matrix
         G_k = self.UAV.G[:, k]
 
         # Compute jamming power
         Power_jamming = sum(j.power for j in self.jammer_list)
 
-        alpha_k = math.pow(abs((h_U_k.H + Psi.H * H_c) * G_k), 2)
-        beta_k = math.pow(np.linalg.norm((h_U_k.H + Psi.H * H_c) * self.UAV.G[:, :k]), 2) + dB_to_normal(noise_power) * 1e-3 + Power_jamming
+        alpha_k = np.abs((h_U_k.conj().T + Psi.conj().T @ H_c) @ G_k) ** 2
+        beta_k = np.linalg.norm((h_U_k.conj().T + Psi.conj().T @ H_c) @ self.UAV.G[:, :k]) ** 2 + dB_to_normal(noise_power) * 1e-3 + Power_jamming
 
-        return math.log10(1 + abs(alpha_k / beta_k))
+        return np.log10(1 + abs(alpha_k / beta_k))
 
     def calculate_secure_capacity_of_user_k(self, k):
         """
@@ -132,5 +132,5 @@ class MiniSystem(object):
         """
         user = self.user_list[k]
         R_k_unsecure = user.capacity
-        R_k_maxeavesdrop = max(self.eavesdrop_capacity_array[:, k])
+        R_k_maxeavesdrop = np.max(self.eavesdrop_capacity_array[:, k])
         return max(0, R_k_unsecure - R_k_maxeavesdrop)
