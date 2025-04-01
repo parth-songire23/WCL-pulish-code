@@ -44,13 +44,19 @@ def transform_coordinates(coor_sys, coor):
     """
     return np.array([np.dot(axis, coor) for axis in coor_sys])
 
-def dB_to_linear(dB):
-    """Converts dB to linear scale."""
-    return 10 ** (dB / 10)
+def dB_to_normal(dB):
+    """
+    input: dB
+    output: normal vaule
+    """
+    return math.pow(10, (dB/10))
 
-def linear_to_dB(value):
-    """Converts linear scale to dB."""
-    return -10 * math.log10(value)
+def normal_to_dB(normal):
+    """
+    input: normal
+    output: dB value
+    """
+    return -10 * math.log10(normal)
 
 def diag_to_vector(diagonal_matrix):
     """Converts a diagonal matrix into a vector."""
