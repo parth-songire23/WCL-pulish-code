@@ -1,6 +1,5 @@
 import os
 import numpy as np
-import cmath
 import matplotlib.pyplot as plt
 from scipy.io import loadmat, savemat
 
@@ -35,23 +34,31 @@ class LoadAndPlot:
 
         for ep_cnt in range(ep_num):
             file_name = f"simulation_result_ep_{ep_cnt}.mat"
-            if not os.path.exists(os.path.join(self.store_path, file_name)):
+            file_path = os.path.join(self.store_path, file_name)
+            
+            if not os.path.exists(file_path):
                 print(f"Warning: {file_name} not found. Skipping...")
                 continue
 
             mat_ep = self.load_one_ep(file_name)
+            result_key = f"result_{ep_cnt}"
+            if result_key not in mat_ep:
+                print(f"Warning: {result_key} missing in {file_name}. Skipping...")
+                continue
+            
+            result_data = mat_ep[result_key]
 
-            result_dic['reward'] += list(mat_ep[f"result_{ep_cnt}"]["reward"][0][0])
-
+            result_dic['reward'] += list(result_data["reward"][0][0])
+            
             for i in range(self.user_num):
-                result_dic['user_capacity'][i] += list(mat_ep[f"result_{ep_cnt}"]["user_capacity"][0][0][:, i])
-                result_dic['secure_capacity'][i] += list(mat_ep[f"result_{ep_cnt}"]["secure_capacity"][0][0][:, i])
-
+                result_dic['user_capacity'][i] += list(result_data["user_capacity"][0][0][:, i])
+                result_dic['secure_capacity'][i] += list(result_data["secure_capacity"][0][0][:, i])
+            
             for i in range(self.attacker_num):
-                result_dic['attacker_capacity'][i] += list(mat_ep[f"result_{ep_cnt}"]["attaker_capacity"][0][0][:, i])
+                result_dic['attacker_capacity'][i] += list(result_data["attacker_capacity"][0][0][:, i])
 
             for i in range(self.RIS_ant_num):
-                result_dic['RIS_elements'][i] += list(mat_ep[f"result_{ep_cnt}"]["reflecting_coefficient"][0][0][:, i])
+                result_dic['RIS_elements'][i] += list(result_data["reflecting_coefficient"][0][0][:, i])
 
         print("Data loading complete.")
         return result_dic
@@ -60,56 +67,29 @@ class LoadAndPlot:
         """Generate and save performance plots."""
         plot_dir = os.path.join(self.store_path, 'plot', 'RIS')
         os.makedirs(plot_dir, exist_ok=True)
-
         print("Generating plots...")
 
-        # Plot Reward
-        plt.figure("Reward")
-        plt.plot(range(len(self.all_steps['reward'])), self.all_steps['reward'], color='blue')
-        plt.xlabel("Steps")
-        plt.ylabel("Reward")
-        plt.title("Reward per Step")
-        plt.savefig(os.path.join(self.store_path, 'plot', 'reward.png'))
-        plt.close()
-
-        # Plot Secure Capacity
-        plt.figure("Secure Capacity")
-        for i in range(self.user_num):
-            plt.plot(self.all_steps['secure_capacity'][i], label=f"User {i}", color=self.color_list[i])
-        plt.xlabel("Steps")
-        plt.ylabel("Secure Capacity")
-        plt.title("Secure Capacity per Step")
-        plt.legend()
-        plt.savefig(os.path.join(self.store_path, 'plot', 'secure_capacity.png'))
-        plt.close()
-
-        # Plot User Capacity
-        plt.figure("User Capacity")
-        for i in range(self.user_num):
-            plt.plot(self.all_steps['user_capacity'][i], label=f"User {i}", color=self.color_list[i])
-        plt.xlabel("Steps")
-        plt.ylabel("User Capacity")
-        plt.title("User Capacity per Step")
-        plt.legend()
-        plt.savefig(os.path.join(self.store_path, 'plot', 'user_capacity.png'))
-        plt.close()
-
-        # Plot Attacker Capacity
-        plt.figure("Attacker Capacity")
-        for i in range(self.attacker_num):
-            plt.plot(self.all_steps['attacker_capacity'][i], label=f"Attacker {i}", color=self.color_list[i])
-        plt.xlabel("Steps")
-        plt.ylabel("Attacker Capacity")
-        plt.title("Attacker Capacity per Step")
-        plt.legend()
-        plt.savefig(os.path.join(self.store_path, 'plot', 'attacker_capacity.png'))
-        plt.close()
-
-        # Plot RIS Elements
+        self._plot_metric('reward', "Reward per Step", "Reward", 'reward.png')
+        self._plot_metric('secure_capacity', "Secure Capacity per Step", "Secure Capacity", 'secure_capacity.png')
+        self._plot_metric('user_capacity', "User Capacity per Step", "User Capacity", 'user_capacity.png')
+        self._plot_metric('attacker_capacity', "Attacker Capacity per Step", "Attacker Capacity", 'attacker_capacity.png')
+        
         for i in range(self.RIS_ant_num):
             self.plot_one_RIS_element(i, plot_dir)
-
+        
         print("Plots saved successfully.")
+
+    def _plot_metric(self, key, title, ylabel, filename):
+        """Helper function to plot different metrics."""
+        plt.figure(title)
+        for i, data in enumerate(self.all_steps[key]):
+            plt.plot(data, label=f"{key.capitalize()} {i}", color=self.color_list[i % len(self.color_list)])
+        plt.xlabel("Steps")
+        plt.ylabel(ylabel)
+        plt.title(title)
+        plt.legend()
+        plt.savefig(os.path.join(self.store_path, 'plot', filename))
+        plt.close()
 
     def plot_one_RIS_element(self, index, plot_dir):
         """Plot real, imaginary, and phase components of an RIS element."""
@@ -117,9 +97,9 @@ class LoadAndPlot:
         ax_real_imag = plt.subplot(1, 1, 1)
         ax_phase = ax_real_imag.twinx()
 
-        real_values = np.real(self.all_steps['RIS_elements'][index])
-        imag_values = np.imag(self.all_steps['RIS_elements'][index])
-        phase_values = [cmath.phase(complex_num) for complex_num in self.all_steps['RIS_elements'][index]]
+        ris_values = np.array(self.all_steps['RIS_elements'][index])
+        real_values, imag_values = np.real(ris_values), np.imag(ris_values)
+        phase_values = np.angle(ris_values)  # Using numpy's vectorized function
 
         ax_real_imag.plot(real_values, color='b', label="Real")
         ax_real_imag.plot(imag_values, color='c', label="Imaginary")
