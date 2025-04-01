@@ -61,12 +61,14 @@ for i in range(episode_num):
             break
 
     # 6. Plot & Save Episode Results
-    plt.cla()
+    plt.clf()
     plt.plot(bit_rate_list, color="green", label="Bit Rate (bits/s/Hz)")
     plt.plot(power_list, color="red", label="Total Power (W)")
     plt.legend()
     
-    save_path = os.path.join(os.getcwd(), "results", f"episode_{i}.png")
+    results_dir = os.path.join(os.getcwd(), "results")
+    os.makedirs(results_dir, exist_ok=True)
+    save_path = os.path.join(results_dir, f"episode_{i}.png")
     plt.savefig(save_path)
 
     scores.append(score)
