@@ -45,8 +45,8 @@ class mmWave_channel:
     def get_estimated_channel_matrix(self):
         """Computes estimated channel matrix for mmWave propagation."""
         N_t, N_r = self.transmitter.ant_num, self.receiver.ant_num
-        channel_matrix = np.mat(np.ones((N_r, N_t), dtype=complex))
-        
+        channel_matrix = np.ones((N_r, N_t), dtype=complex)  # ✅ Replaced np.mat()
+
         relative_position = self.receiver.coordinate - self.transmitter.coordinate
         r_under_t_car_coor = get_coor_ref(self.transmitter.coor_sys, relative_position)
         t_under_r_car_coor = get_coor_ref([-self.receiver.coor_sys[0], self.receiver.coor_sys[1], -self.receiver.coor_sys[2]], relative_position)
@@ -58,13 +58,13 @@ class mmWave_channel:
         r_array_response = self.generate_array_response(self.receiver, t_r_theta, t_r_fai)
         
         LOS_phase = 2 * math.pi * self.frequency * np.linalg.norm(relative_position) / 3e8
-        return cmath.exp(1j * LOS_phase) * math.sqrt(self.path_loss_normal) * (r_array_response * t_array_response.H)
+        return cmath.exp(1j * LOS_phase) * math.sqrt(self.path_loss_normal) * (r_array_response @ t_array_response.T.conj())  # ✅ Used @ instead of *
 
     def generate_array_response(self, transceiver, theta, fai):
         """Generates array response vector based on antenna configuration."""
         ant_type, ant_num = transceiver.ant_type, transceiver.ant_num
-        response = np.mat(np.ones((ant_num, 1), dtype=complex))
-        
+        response = np.ones((ant_num, 1), dtype=complex)  # ✅ Replaced np.mat()
+
         if ant_type == 'UPA':
             row_num = int(math.sqrt(ant_num))
             for i in range(row_num):
@@ -73,10 +73,12 @@ class mmWave_channel:
         elif ant_type == 'ULA':
             for i in range(ant_num):
                 response[i, 0] = cmath.exp(1j * math.sin(theta) * math.cos(fai) * i * math.pi)
-        return response if ant_type in ['UPA', 'ULA'] else np.mat(np.array([1]))
+
+        return response if ant_type in ['UPA', 'ULA'] else np.array([[1]])  # ✅ Fixed return value
 
     def update_CSI(self):
         """Updates path loss and channel state information (CSI)."""
         self.path_loss_normal = self.get_channel_path_loss()
         self.path_loss_dB = normal_to_dB(self.path_loss_normal)
         self.channel_matrix = self.get_estimated_channel_matrix()
+
