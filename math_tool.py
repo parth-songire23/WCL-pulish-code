@@ -7,7 +7,7 @@ from mpl_toolkits.mplot3d import Axes3D
 from matplotlib.patches import FancyArrowPatch
 from mpl_toolkits.mplot3d import proj3d
 
-def cartesian_to_spherical(cartesian_coord):
+def cartesian_coordinate_to_spherical_coordinate(cartesian_coord):
     """
     Converts Cartesian coordinates to spherical coordinates.
     Input:  1x3 np.array -> [x, y, z]
