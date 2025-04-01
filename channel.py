@@ -3,7 +3,7 @@ import math
 import cmath
 from math_tool import *
 
-class mmWaveChannel:
+class mmWave_Channel:
     """
     Models mmWave channel between transmitter and receiver.
     Supports UAV, RIS, Users, Attackers, and Jammers.
