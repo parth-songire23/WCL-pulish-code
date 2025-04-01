@@ -104,6 +104,24 @@ class MiniSystem:
         # 9. Render system visualization
         self.render_obj = Render(self)
 
+    def update_channel_capacity(self):
+        """
+        function used in step to calculate user and attackers' capacity 
+        """
+        # 1 calculate eavesdrop rate
+        for attacker in self.attacker_list:
+            attacker.capacity = self.calculate_capacity_array_of_attacker_p(attacker.index)
+            self.eavesdrop_capacity_array[attacker.index, :] = attacker.capacity
+            # remmeber to update comprehensive_channel
+            attacker.comprehensive_channel = self.calculate_comprehensive_channel_of_attacker_p(attacker.index)
+        # 2 calculate unsecure rate
+        for user in self.user_list:
+            user.capacity = self.calculate_capacity_of_user_k(user.index)
+            # 3 calculate secure rate
+            user.secure_capacity = self.calculate_secure_capacity_of_user_k(user.index)
+            # remmeber to update comprehensive_channel
+            user.comprehensive_channel = self.calculate_comprehensive_channel_of_user_k(user.index)
+
     def calculate_capacity_of_user_k(self, k):
         """
         Calculates the communication capacity for user k with jamming power added.
