@@ -29,6 +29,17 @@ def cartesian_to_spherical(cartesian_coord):
 
     return np.array([r, theta, phi])
 
+def get_coor_ref(coor_sys, coor):
+    """
+    input:  coor_sys: normalized 1,3 np.array list (1,3)
+            coor: coordinate under earth system
+    output: referenced coordinate for x,y, normalized 1,3 np.array
+    """
+    x_ref = np.dot(coor_sys[0],coor)
+    y_ref = np.dot(coor_sys[1],coor)
+    z_ref = np.dot(coor_sys[2],coor)
+    return np.array([x_ref, y_ref, z_ref])
+
 def normalize_vector(vector):
     """Returns a normalized vector."""
     return vector / np.linalg.norm(vector)
