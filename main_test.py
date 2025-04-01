@@ -12,7 +12,7 @@ system = MiniSystem(
     attacker_num=1,  # Ensure attacker is included
     RIS_ant_num=4,
     UAV_ant_num=4,
-    if_dir_link=1,
+    if_dir_link=True,
     if_with_RIS=True,
     if_move_users=True,
     if_movements=True,
@@ -86,8 +86,8 @@ while episode_cnt < episode_num:
         new_state_1, reward, done, jamming_effect = system.step(
             action_0=action_2[0],
             action_1=action_2[1],
-            G=action_1[:2 * system.UAV.ant_num * system.user_num],
-            Phi=action_1[2 * system.UAV.ant_num * system.user_num:],
+            G=np.array(action_1[:2 * system.UAV.ant_num * system.user_num]),
+            Phi=np.array(action_1[2 * system.UAV.ant_num * system.user_num:]),
             set_pos_x=action_2[0],
             set_pos_y=action_2[1]
         )
