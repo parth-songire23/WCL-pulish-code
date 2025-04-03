@@ -225,3 +225,36 @@ class MiniSystem:
         R_k_unsecure = user.capacity
         R_k_maxeavesdrop = np.max(self.eavesdrop_capacity_array[:, k])
         return max(0, R_k_unsecure - R_k_maxeavesdrop)
+
+    def get_system_action_dim(self):
+        """
+        Function used to get the dimension of actions in the system.
+        """
+        result = 0
+        # 1. UAV movement (2D movement)
+        result += 2
+        
+        # 2. RIS reflecting elements (if applicable)
+        if getattr(self, 'if_with_RIS', False):  # Use getattr to avoid attribute errors
+            result += getattr(self.RIS, 'ant_num', 0)  # Ensure RIS has 'ant_num'
+    
+        # 3. Beamforming matrix dimension
+        result += 2 * getattr(self.UAV, 'ant_num', 1) * getattr(self, 'user_num', 1)
+        
+        return result
+    
+    
+    def get_system_state_dim(self):
+        """
+        Function used to get the dimension of states in the system.
+        """
+        result = 0
+        # 1. Users' and attackers' comprehensive channel
+        result += 2 * (getattr(self, 'user_num', 1) + getattr(self, 'attacker_num', 0)) * getattr(self.UAV, 'ant_num', 1)
+    
+        # 2. UAV position state (if applicable)
+        if getattr(self, 'if_UAV_pos_state', False):  
+            result += 3  # Assuming 3D coordinates for UAV position
+    
+        return result
+    
