@@ -69,13 +69,25 @@ def normal_to_dB(normal):
     """
     return -10 * math.log10(normal)
 
-def diag_to_vector(diagonal_matrix):
-    """Converts a diagonal matrix into a vector."""
-    return np.diag(diagonal_matrix).reshape(-1, 1)
-
+def diag_to_vector(diag):
+    """
+    transfer a diagnal matrix into a vector
+    """
+    vec_size = np.shape(diag)[0]
+    vector = np.mat(np.zeros((vec_size, 1), dtype=complex), dtype=complex)
+    for i in range(vec_size):
+        vector[i, 0] = diag[i, i]
+    return vector
+    
 def vector_to_diag(vector):
-    """Converts a vector into a diagonal matrix."""
-    return np.diagflat(vector)
+    """
+    transfer a vector into a diagnal matrix
+    """
+    vec_size = np.shape(vector)[0]
+    diag = np.mat(np.zeros((vec_size, vec_size), dtype=complex), dtype=complex)
+    for i in range(vec_size):
+        diag[i, i] = vector[i, 0]
+    return diag
 
 def ensure_positive(value):
     """Returns max(0, value)."""
