@@ -113,17 +113,17 @@ class Agent:
     Reinforcement Learning Agent using the DDPG algorithm.
     """
     def __init__(self, alpha, beta, input_dims, tau, env, gamma=0.99, 
-                 n_actions=2, batch_size=64, memory_max_size=1000000, layer1_size, layer2_size, layer3_size):
+                 n_actions=2, batch_size=64, memory_max_size=1000000, layer1_size=800, layer2_size=600, layer3_size=512, layer4_size=256):
         self.gamma = gamma
         self.tau = tau
         self.memory = ReplayBuffer(memory_max_size, input_dims, n_actions)
         self.batch_size = batch_size
 
-        self.actor = ActorNetwork(alpha, input_dims, layer1_size, layer2_size, layer3_size, n_actions, name='Actor')
-        self.critic = CriticNetwork(beta, input_dims, layer1_size, layer2_size, layer3_size, n_actions, name='Critic')
+        self.actor = ActorNetwork(alpha, input_dims, layer1_size, layer2_size, layer3_size, layer4_size, n_actions, name='Actor')
+        self.critic = CriticNetwork(beta, input_dims, layer1_size, layer2_size, layer3_size, layer4_size, n_actions, name='Critic')
 
-        self.target_actor = ActorNetwork(alpha, input_dims, layer1_size, layer2_size, layer3_size, n_actions, name='TargetActor')
-        self.target_critic = CriticNetwork(beta, input_dims, layer1_size, layer2_size, layer3_size, n_actions, name='TargetCritic')
+        self.target_actor = ActorNetwork(alpha, input_dims, layer1_size, layer2_size, layer3_size, layer4_size, n_actions, name='TargetActor')
+        self.target_critic = CriticNetwork(beta, input_dims, layer1_size, layer2_size, layer3_size, layer4_size, n_actions, name='TargetCritic')
 
         self.noise = OUActionNoise(mu=np.zeros(n_actions))
         self.update_network_parameters(tau=1)
