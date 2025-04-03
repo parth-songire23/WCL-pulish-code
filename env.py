@@ -206,7 +206,7 @@ class MiniSystem:
         h_U_k = self.h_U_k[k].channel_matrix
         h_R_k = self.h_R_k[k].channel_matrix
         Psi = np.diag(self.RIS.Phi)
-        H_c = np.diag(h_R_k).conj().T @ self.H_UR.channel_matrix
+        H_c = np.diagflat(h_R_k).conj().T @ self.H_UR.channel_matrix
         G_k = self.UAV.G[:, k]
 
         # Compute jamming power
