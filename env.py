@@ -106,102 +106,94 @@ class MiniSystem:
 
     def update_channel_capacity(self):
         """
-        function used in step to calculate user and attackers' capacity 
+        Function to calculate user and attackers' capacity.
         """
-        # 1 calculate eavesdrop rate
+        # 1. Calculate eavesdrop rate
         for attacker in self.attacker_list:
             attacker.capacity = self.calculate_capacity_array_of_attacker_p(attacker.index)
             self.eavesdrop_capacity_array[attacker.index, :] = attacker.capacity
-            # remmeber to update comprehensive_channel
             attacker.comprehensive_channel = self.calculate_comprehensive_channel_of_attacker_p(attacker.index)
-        # 2 calculate unsecure rate
+        
+        # 2. Calculate unsecure rate
         for user in self.user_list:
             user.capacity = self.calculate_capacity_of_user_k(user.index)
-            # 3 calculate secure rate
+            # 3. Calculate secure rate
             user.secure_capacity = self.calculate_secure_capacity_of_user_k(user.index)
-            # remmeber to update comprehensive_channel
             user.comprehensive_channel = self.calculate_comprehensive_channel_of_user_k(user.index)
 
     def calculate_comprehensive_channel_of_attacker_p(self, p):
         """
-        used in update_channel_capacity to calculate the comprehensive_channel of attacker p
+        Calculates the comprehensive_channel of attacker p.
         """
         h_U_p = self.h_U_p[p].channel_matrix
         h_R_p = self.h_R_p[p].channel_matrix
         Psi = diag_to_vector(self.RIS.Phi)
-        H_c = vector_to_diag(h_R_p).H * self.H_UR.channel_matrix
-        return h_U_p.H + Psi.H * H_c
+        H_c = vector_to_diag(h_R_p).conj().T @ self.H_UR.channel_matrix
+        return h_U_p.conj().T + Psi.conj().T @ H_c
 
     def calculate_comprehensive_channel_of_user_k(self, k):
         """
-        used in update_channel_capacity to calculate the comprehensive_channel of user k
+        Calculates the comprehensive_channel of user k.
         """
         h_U_k = self.h_U_k[k].channel_matrix
         h_R_k = self.h_R_k[k].channel_matrix
         Psi = diag_to_vector(self.RIS.Phi)
-        H_c = vector_to_diag(h_R_k).H * self.H_UR.channel_matrix
-        return h_U_k.H + Psi.H * H_c
+        H_c = vector_to_diag(h_R_k).conj().T @ self.H_UR.channel_matrix
+        return h_U_k.conj().T + Psi.conj().T @ H_c
 
     def calculate_capacity_of_user_k(self, k):
         """
-        function used in update_channel_capacity to calculate one user
+        Calculates the capacity of a user.
         """     
         noise_power = self.user_list[k].noise_power
         h_U_k = self.h_U_k[k].channel_matrix
         h_R_k = self.h_R_k[k].channel_matrix
         Psi = diag_to_vector(self.RIS.Phi)
-        H_c = vector_to_diag(h_R_k).H * self.H_UR.channel_matrix
+        H_c = vector_to_diag(h_R_k).conj().T @ self.H_UR.channel_matrix
         G_k = self.UAV.G[:, k]
-        G_k_ = 0
-        if len(self.user_list) == 1:
-            G_k_ = np.mat(np.zeros((self.UAV.ant_num, 1), dtype=complex), dtype=complex)
-        else:
-            G_k_1 = self.UAV.G[:, 0:k]
-            G_k_2 = self.UAV.G[:, k+1:]
-            G_k_ = np.hstack((G_k_1, G_k_2))
-        alpha_k = math.pow(abs((h_U_k.H + Psi.H * H_c) * G_k), 2)
-        beta_k = math.pow(np.linalg.norm((h_U_k.H + Psi.H * H_c)*G_k_), 2) + dB_to_normal(noise_power) * 1e-3
-        return math.log10(1 + abs(alpha_k / beta_k))
+        
+        G_k_ = np.zeros((self.UAV.ant_num, 1), dtype=complex) if len(self.user_list) == 1 else np.hstack((self.UAV.G[:, :k], self.UAV.G[:, k+1:]))
+        
+        alpha_k = np.abs((h_U_k.conj().T + Psi.conj().T @ H_c) @ G_k) ** 2
+        beta_k = np.linalg.norm((h_U_k.conj().T + Psi.conj().T @ H_c) @ G_k_) ** 2 + dB_to_normal(noise_power) * 1e-3
+        
+        return np.log10(1 + np.abs(alpha_k / beta_k))
 
     def calculate_capacity_array_of_attacker_p(self, p):
         """
-        function used in update_channel_capacity to calculate one attacker capacities to K users
-        output is a K length np.array ,shape: (K,)
+        Calculates the attacker's capacities to K users.
         """
         K = len(self.user_list)
         noise_power = self.attacker_list[p].noise_power
         h_U_p = self.h_U_p[p].channel_matrix
         h_R_p = self.h_R_p[p].channel_matrix
         Psi = diag_to_vector(self.RIS.Phi)
-        H_c = vector_to_diag(h_R_p).H * self.H_UR.channel_matrix
+        H_c = vector_to_diag(h_R_p).conj().T @ self.H_UR.channel_matrix
+        
         if K == 1:
             G_k = self.UAV.G
-            G_k_ = np.mat(np.zeros((self.UAV.ant_num, 1), dtype=complex), dtype=complex)
-            alpha_p = math.pow(abs((h_U_p.H + Psi.H * H_c) * G_k), 2)
-            beta_p = math.pow(np.linalg.norm((h_U_p.H + Psi.H * H_c)*G_k_), 2) + dB_to_normal(noise_power) * 1e-3
-            return np.array([math.log10(1 + abs(alpha_p / beta_p))])
+            G_k_ = np.zeros((self.UAV.ant_num, 1), dtype=complex)
+            alpha_p = np.abs((h_U_p.conj().T + Psi.conj().T @ H_c) @ G_k) ** 2
+            beta_p = np.linalg.norm((h_U_p.conj().T + Psi.conj().T @ H_c) @ G_k_) ** 2 + dB_to_normal(noise_power) * 1e-3
+            return np.array([np.log10(1 + np.abs(alpha_p / beta_p))])
         else:
             result = np.zeros(K)
             for k in range(K):
-                G_k = G_k = self.UAV.G[:, k]
-                G_k_1 = self.UAV.G[:, 0:k]
-                G_k_2 = self.UAV.G[:, k+1:]
-                G_k_ = np.hstack((G_k_1, G_k_2))
-                alpha_p = math.pow(abs((h_U_p.H + Psi.H * H_c) * G_k), 2)
-                beta_p = math.pow(np.linalg.norm((h_U_p.H + Psi.H * H_c)*G_k_), 2) + dB_to_normal(noise_power) * 1e-3
-                result[k] = math.log10(1 + abs(alpha_p / beta_p))
+                G_k = self.UAV.G[:, k]
+                G_k_ = np.hstack((self.UAV.G[:, :k], self.UAV.G[:, k+1:]))
+                alpha_p = np.abs((h_U_p.conj().T + Psi.conj().T @ H_c) @ G_k) ** 2
+                beta_p = np.linalg.norm((h_U_p.conj().T + Psi.conj().T @ H_c) @ G_k_) ** 2 + dB_to_normal(noise_power) * 1e-3
+                result[k] = np.log10(1 + np.abs(alpha_p / beta_p))
             return result
 
     def calculate_secure_capacity_of_user_k(self, k=2):
         """
-        function used in update_channel_capacity to calculate the secure rate of user k
+        Calculates the secure rate of user k.
         """
         user = self.user_list[k]
         R_k_unsecure = user.capacity
         R_k_maxeavesdrop = max(self.eavesdrop_capacity_array[:, k])
-        secrecy_rate= max(0, R_k_unsecure - R_k_maxeavesdrop)
-        return secrecy_rate
-
+        return max(0, R_k_unsecure - R_k_maxeavesdrop)
 
     def calculate_capacity_of_user_k(self, k):
         """
