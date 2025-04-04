@@ -126,17 +126,17 @@ class Agent:
         self.batch_size = batch_size
     
         self.actor = ActorNetwork(alpha, input_dims, layer1_size,
-                                  layer2_size, layer3_size, layer4_size, n_actions=n_actions,
+                                  layer2_size, layer3_size, layer4_size, n_actions,
                                   name='Actor_' + agent_name,chkpt_dir=env.data_manager.store_path )
         self.critic = CriticNetwork(beta, input_dims, layer1_size,
-                                    layer2_size, layer3_size, layer4_size, n_actions=n_actions,
+                                    layer2_size, layer3_size, layer4_size, n_actions,
                                     name='Critic_' + agent_name,chkpt_dir=env.data_manager.store_path)
     
         self.target_actor = ActorNetwork(alpha, input_dims, layer1_size,
-                                         layer2_size, layer3_size, layer4_size, n_actions=n_actions,
+                                         layer2_size, layer3_size, layer4_size, n_actions,
                                          name='TargetActor_' + agent_name,chkpt_dir=env.data_manager.store_path)
         self.target_critic = CriticNetwork(beta, input_dims, layer1_size,
-                                           layer2_size, layer3_size, layer4_size, n_actions=n_actions,
+                                           layer2_size, layer3_size, layer4_size, n_actions=,
                                            name='TargetCritic_' + agent_name,chkpt_dir=env.data_manager.store_path)
         if noise == 'OU':
             self.noise = OUActionNoise(mu=np.zeros(n_actions))
