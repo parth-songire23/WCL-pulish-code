@@ -122,7 +122,7 @@ class Agent:
         self.layer4_size = layer4_size
         self.gamma = gamma
         self.tau = tau
-        self.memory = ReplayBuffer(max_size, input_dims, n_actions)
+        self.memory = ReplayBuffer(memory_max_size, input_dims, n_actions)
         self.batch_size = batch_size
     
         self.actor = ActorNetwork(alpha, input_dims, layer1_size,
