@@ -113,7 +113,7 @@ class Agent:
     Reinforcement Learning Agent using the DDPG algorithm.
     """
     def __init__(self, alpha, beta, input_dims, tau, env, gamma=0.99, 
-                 n_actions=2, batch_size=64, memory_max_size=1000000, layer1_size=800, layer2_size=600, layer3_size=512, layer4_size=256, agent_name="G_and_Phi"):
+                 n_actions=2, batch_size=64, memory_max_size=1000000, layer1_size=800, layer2_size=600, layer3_size=512, layer4_size=256, agent_name):
         self.gamma = gamma
         self.tau = tau
         self.memory = ReplayBuffer(memory_max_size, input_dims, n_actions)
