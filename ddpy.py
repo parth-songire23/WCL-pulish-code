@@ -115,35 +115,35 @@ class Agent:
     def __init__(self, alpha, beta, input_dims, tau, env, gamma=0.99,
              n_actions=2, max_size=1000000, layer1_size=400,
              layer2_size=300, layer3_size=256, layer4_size=128, batch_size=64, noise = 'AWGN', agent_name = 'default', load_file = ''):
-    self.load_file = load_file
-    self.layer1_size = layer1_size
-    self.layer2_size = layer2_size
-    self.layer3_size = layer3_size
-    self.layer4_size = layer4_size
-    self.gamma = gamma
-    self.tau = tau
-    self.memory = ReplayBuffer(max_size, input_dims, n_actions)
-    self.batch_size = batch_size
-
-    self.actor = ActorNetwork(alpha, input_dims, layer1_size,
-                              layer2_size, layer3_size, layer4_size, n_actions=n_actions,
-                              name='Actor_' + agent_name,chkpt_dir=env.data_manager.store_path )
-    self.critic = CriticNetwork(beta, input_dims, layer1_size,
-                                layer2_size, layer3_size, layer4_size, n_actions=n_actions,
-                                name='Critic_' + agent_name,chkpt_dir=env.data_manager.store_path)
-
-    self.target_actor = ActorNetwork(alpha, input_dims, layer1_size,
-                                     layer2_size, layer3_size, layer4_size, n_actions=n_actions,
-                                     name='TargetActor_' + agent_name,chkpt_dir=env.data_manager.store_path)
-    self.target_critic = CriticNetwork(beta, input_dims, layer1_size,
-                                       layer2_size, layer3_size, layer4_size, n_actions=n_actions,
-                                       name='TargetCritic_' + agent_name,chkpt_dir=env.data_manager.store_path)
-    if noise == 'OU':
-        self.noise = OUActionNoise(mu=np.zeros(n_actions))
-    elif noise == 'AWGN':
-        self.noise = AWGNActionNoise(mu = np.zeros(n_actions))
-    # tau = 1 means copy parameters to target
-    self.update_network_parameters(tau=1)
+        self.load_file = load_file
+        self.layer1_size = layer1_size
+        self.layer2_size = layer2_size
+        self.layer3_size = layer3_size
+        self.layer4_size = layer4_size
+        self.gamma = gamma
+        self.tau = tau
+        self.memory = ReplayBuffer(max_size, input_dims, n_actions)
+        self.batch_size = batch_size
+    
+        self.actor = ActorNetwork(alpha, input_dims, layer1_size,
+                                  layer2_size, layer3_size, layer4_size, n_actions=n_actions,
+                                  name='Actor_' + agent_name,chkpt_dir=env.data_manager.store_path )
+        self.critic = CriticNetwork(beta, input_dims, layer1_size,
+                                    layer2_size, layer3_size, layer4_size, n_actions=n_actions,
+                                    name='Critic_' + agent_name,chkpt_dir=env.data_manager.store_path)
+    
+        self.target_actor = ActorNetwork(alpha, input_dims, layer1_size,
+                                         layer2_size, layer3_size, layer4_size, n_actions=n_actions,
+                                         name='TargetActor_' + agent_name,chkpt_dir=env.data_manager.store_path)
+        self.target_critic = CriticNetwork(beta, input_dims, layer1_size,
+                                           layer2_size, layer3_size, layer4_size, n_actions=n_actions,
+                                           name='TargetCritic_' + agent_name,chkpt_dir=env.data_manager.store_path)
+        if noise == 'OU':
+            self.noise = OUActionNoise(mu=np.zeros(n_actions))
+        elif noise == 'AWGN':
+            self.noise = AWGNActionNoise(mu = np.zeros(n_actions))
+        # tau = 1 means copy parameters to target
+        self.update_network_parameters(tau=1)
                      
     # def __init__(self, alpha, beta, input_dims, tau, env, gamma=0.99, 
     #              n_actions=2, batch_size=64, memory_max_size=1000000, layer1_size=800, layer2_size=600, layer3_size=512, layer4_size=256, agent_name="G_and_Phi"):
