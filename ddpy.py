@@ -113,7 +113,7 @@ class Agent:
     Reinforcement Learning Agent using the DDPG algorithm.
     """
     def __init__(self, alpha, beta, input_dims, tau, env, gamma=0.99,
-             n_actions=2, max_size=1000000, layer1_size=400,
+             n_actions=2, memory_max_size=1000000, layer1_size=400,
              layer2_size=300, layer3_size=256, layer4_size=128, batch_size=64, noise = 'AWGN', agent_name = 'default', load_file = ''):
         self.load_file = load_file
         self.layer1_size = layer1_size
