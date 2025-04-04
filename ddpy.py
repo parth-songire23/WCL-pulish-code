@@ -119,7 +119,16 @@ class Agent:
         self.memory = ReplayBuffer(memory_max_size, input_dims, n_actions)
         self.batch_size = batch_size
 
-        self.actor = ActorNetwork(alpha, input_dims, layer1_size, layer2_size, layer3_size, layer4_size, n_actions, name='Actor')
+        self.actor = ActorNetwork(
+            alpha=alpha,
+            input_dims=input_dims,
+            layer1_size=layer1_size,
+            layer2_size=layer2_size,
+            layer3_size=layer3_size,
+            layer4_size=layer4_size,
+            n_actions=n_actions,
+            name='Actor'
+        )
         self.critic = CriticNetwork(beta, input_dims, layer1_size, layer2_size, layer3_size, layer4_size, n_actions, name='Critic')
 
         self.target_actor = ActorNetwork(alpha, input_dims, layer1_size, layer2_size, layer3_size, layer4_size, n_actions, name='TargetActor')
