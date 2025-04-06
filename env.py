@@ -142,6 +142,29 @@ class MiniSystem:
         # 8. Reset capacity
         self.update_channel_capacity()
 
+    def observe(self):
+        """
+        Used in function main to get current state.
+        The state is a list with:
+        - Real and imaginary parts of the comprehensive channel for users and attackers
+        - UAV position (if enabled)
+        """
+        comprehensive_channel_elements_list = []
+    
+        for entity in self.user_list + self.attacker_list:
+            # Flatten the comprehensive_channel array safely and convert to real + imag parts
+            flattened = np.ravel(entity.comprehensive_channel)
+            real_part = np.real(flattened).tolist()
+            imag_part = np.imag(flattened).tolist()
+            comprehensive_channel_elements_list.extend(real_part + imag_part)
+    
+        UAV_position_list = []
+        if self.if_UAV_pos_state:
+            UAV_position_list = list(self.UAV.coordinate)
+    
+        return comprehensive_channel_elements_list + UAV_position_list
+
+
     
     def update_channel_capacity(self):
         """
