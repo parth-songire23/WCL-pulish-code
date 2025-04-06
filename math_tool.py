@@ -85,7 +85,7 @@ def dataframe_to_dict(df):
     """Converts a Pandas DataFrame to a dictionary."""
     return {col: df[col].values for col in df.columns}
 
-def list_to_complex_matrix(real_list, shape):
+def convert_list_to_complex_matrix(real_list, shape):
     """
     Converts a list to a complex matrix.
     Input:
@@ -101,7 +101,7 @@ def list_to_complex_matrix(real_list, shape):
             matrix[i, j] = real_list[2 * (i * K + j)] + 1j * real_list[2 * (i * K + j) + 1]
     return np.mat(matrix)
 
-def list_to_complex_diag(real_list, size):
+def convert_list_to_complex_diag(real_list, size):
     """
     Converts a list into a complex diagonal matrix.
     Input:
