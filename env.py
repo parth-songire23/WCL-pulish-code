@@ -104,6 +104,45 @@ class MiniSystem:
         # 9. Render system visualization
         self.render_obj = Render(self)
 
+    def reset(self):
+        """
+        Reset UAV, users, attackers, beamforming matrix, reflecting coefficient.
+        Compatible with latest versions of libraries.
+        """
+        # 1. Reset UAV
+        self.UAV.reset(coordinate=self.data_manager.read_init_location('UAV', 0))
+    
+        # 2. Reset users
+        for i in range(self.user_num):
+            user_coordinate = self.data_manager.read_init_location('user', i)
+            self.user_list[i].reset(coordinate=user_coordinate)
+    
+        # 3. Reset attackers
+        for i in range(self.attacker_num):
+            attacker_coordinate = self.data_manager.read_init_location('attacker', i)
+            self.attacker_list[i].reset(coordinate=attacker_coordinate)
+    
+        # 4. Reset beamforming matrix
+        self.UAV.G = np.ones((self.UAV.ant_num, self.user_num), dtype=np.complex128)
+        self.UAV.G = np.asmatrix(self.UAV.G)  # Optional, depends on codebase
+        self.UAV.G_Pmax = np.trace(self.UAV.G @ self.UAV.G.H) * self.power_factor
+    
+        # 5. Reset reflecting coefficient
+        identity_matrix = np.eye(self.RIS.ant_num, dtype=np.complex128)
+        self.RIS.Phi = np.asmatrix(np.diag(np.diag(identity_matrix)))
+    
+        # 6. Reset time index for rendering
+        self.render_obj.t_index = 0
+    
+        # 7. Reset Channel State Information (CSI)
+        self.H_UR.update_CSI()
+        for h in self.h_U_k + self.h_U_p + self.h_R_k + self.h_R_p:
+            h.update_CSI()
+    
+        # 8. Reset capacity
+        self.update_channel_capacity()
+
+    
     def update_channel_capacity(self):
         """
         Function to calculate user and attackers' capacity.
