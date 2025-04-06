@@ -85,34 +85,77 @@ def dataframe_to_dict(df):
     """Converts a Pandas DataFrame to a dictionary."""
     return {col: df[col].values for col in df.columns}
 
+# def convert_list_to_complex_matrix(real_list, shape):
+#     """
+#     Converts a list to a complex matrix.
+#     Input:
+#         real_list: 2 * (N*K) list
+#         shape: (N, K) tuple
+#     Output:
+#         N x K complex matrix
+#     """
+#     N, K = shape
+#     matrix = np.zeros((N, K), dtype=complex)
+#     for i in range(N):
+#         for j in range(K):
+#             matrix[i, j] = real_list[2 * (i * K + j)] + 1j * real_list[2 * (i * K + j) + 1]
+#     return np.mat(matrix)
+
 def convert_list_to_complex_matrix(real_list, shape):
     """
-    Converts a list to a complex matrix.
-    Input:
-        real_list: 2 * (N*K) list
-        shape: (N, K) tuple
-    Output:
-        N x K complex matrix
+    Converts a flat list to a complex matrix of given shape.
+    
+    Parameters:
+        real_list (list of float): List of length 2 * N * K representing real and imaginary parts.
+        shape (tuple): Desired shape of the matrix (N, K).
+    
+    Returns:
+        np.ndarray: N x K complex matrix.
     """
     N, K = shape
-    matrix = np.zeros((N, K), dtype=complex)
-    for i in range(N):
-        for j in range(K):
-            matrix[i, j] = real_list[2 * (i * K + j)] + 1j * real_list[2 * (i * K + j) + 1]
-    return np.mat(matrix)
+    real_list = np.array(real_list, dtype=float)
+
+    if real_list.size != 2 * N * K:
+        raise ValueError("Input list length does not match expected size for complex matrix")
+
+    real_parts = real_list[::2].reshape((N, K))
+    imag_parts = real_list[1::2].reshape((N, K))
+    complex_matrix = real_parts + 1j * imag_parts
+
+    return complex_matrix  # modern usage, avoid np.mat
+
+
+# def convert_list_to_complex_diag(real_list, size):
+#     """
+#     Converts a list into a complex diagonal matrix.
+#     Input:
+#         real_list: List of size M
+#         size: Number of diagonal elements (M)
+#     Output:
+#         M x M complex diagonal matrix
+#     """
+#     diag_matrix = np.zeros((size, size), dtype=complex)
+#     np.fill_diagonal(diag_matrix, [cmath.exp(1j * value * math.pi) for value in real_list])
+#     return np.mat(diag_matrix)
 
 def convert_list_to_complex_diag(real_list, size):
     """
-    Converts a list into a complex diagonal matrix.
-    Input:
-        real_list: List of size M
-        size: Number of diagonal elements (M)
-    Output:
-        M x M complex diagonal matrix
+    Converts a list of phase values (scaled between 0 and 1) into a complex diagonal matrix.
+
+    Parameters:
+        real_list (list of float): Phase values of length `size`, each in [0, 1].
+        size (int): Number of diagonal elements.
+
+    Returns:
+        np.ndarray: size x size complex diagonal matrix with e^(j * pi * value) on the diagonal.
     """
-    diag_matrix = np.zeros((size, size), dtype=complex)
-    np.fill_diagonal(diag_matrix, [cmath.exp(1j * value * math.pi) for value in real_list])
-    return np.mat(diag_matrix)
+    if len(real_list) != size:
+        raise ValueError("Input list length must equal the specified size.")
+
+    real_list = np.array(real_list, dtype=float)
+    diag_elements = np.exp(1j * np.pi * real_list)
+    return np.diag(diag_elements)
+
 
 def map_range(x, x_range, y_range):
     """
