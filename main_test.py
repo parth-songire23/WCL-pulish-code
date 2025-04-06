@@ -31,7 +31,7 @@ agent_params = {
     "beta": 0.001,
     "tau": 0.001,
     "batch_size": 64,
-    "memory_max_size": episode_num * step_num,
+    "max_size": episode_num * step_num,
 }
 
 agent_1 = Agent(
