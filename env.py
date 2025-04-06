@@ -142,6 +142,82 @@ class MiniSystem:
         # 8. Reset capacity
         self.update_channel_capacity()
 
+    def step(self, action_0=0, action_1=0, G=0, Phi=0, set_pos_x=0, set_pos_y=0):
+        """
+        Test step: only move UAV and update channel.
+        """
+        # 0. Update time index for rendering
+        self.render_obj.t_index += 1
+    
+        # 1. Update entity positions
+        if self.if_move_users:
+            self.user_list[0].update_coordinate(0.2, -0.5 * math.pi)
+            self.user_list[1].update_coordinate(0.2, -0.5 * math.pi)
+    
+        if self.if_movements:
+            move_x = action_0 * self.UAV.max_movement_per_time_slot
+            move_y = action_1 * self.UAV.max_movement_per_time_slot
+    
+            if self.reverse_x_y[0]:
+                move_x = -move_x
+            if self.reverse_x_y[1]:
+                move_y = -move_y
+    
+            self.UAV.coordinate[0] += move_x
+            self.UAV.coordinate[1] += move_y
+            self.data_manager.store_data([move_x, move_y], 'UAV_movement')
+        else:
+            set_pos_x = map_to(set_pos_x, (-1, 1), self.border[0])
+            set_pos_y = map_to(set_pos_y, (-1, 1), self.border[1])
+            self.UAV.coordinate[0] = set_pos_x
+            self.UAV.coordinate[1] = set_pos_y
+    
+        # 2. Update channel CSI
+        for h in self.h_U_k + self.h_U_p + self.h_R_k + self.h_R_p:
+            h.update_CSI()
+    
+        # Disable direct links if needed
+        if not self.if_dir_link:
+            for h in self.h_U_k + self.h_U_p:
+                h.channel_matrix = np.zeros_like(h.channel_matrix, dtype=complex)
+    
+        # RIS inclusion/exclusion logic
+        if not self.if_with_RIS:
+            self.H_UR.channel_matrix = np.zeros((self.RIS.ant_num, self.UAV.ant_num), dtype=complex)
+        else:
+            self.H_UR.update_CSI()
+    
+        # 3. Update beamforming matrix & reflecting phase shift
+        self.UAV.G = convert_list_to_complex_matrix(G, (self.UAV.ant_num, self.user_num)) * np.sqrt(self.power_factor)
+    
+        if self.if_with_RIS:
+            self.RIS.Phi = convert_list_to_complex_diag(Phi, self.RIS.ant_num)
+    
+        # 4. Update channel capacity
+        self.update_channel_capacity()
+    
+        # 5. Store current system state
+        self.store_current_system_sate()
+    
+        # 6. Get new observation state
+        new_state = self.observe()
+    
+        # 7. Calculate reward
+        reward = math.tanh(self.reward())
+    
+        # 8. Check boundary conditions
+        done = False
+        x, y = self.UAV.coordinate[:2]
+    
+        if not (self.border[0][0] <= x <= self.border[0][1]) or not (self.border[1][0] <= y <= self.border[1][1]):
+            done = True
+            reward = -10
+    
+        self.data_manager.store_data([reward], 'reward')
+    
+        return new_state, reward, done, []
+
+    
     def observe(self):
         """
         Used in function main to get current state.
