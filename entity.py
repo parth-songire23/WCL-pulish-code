@@ -83,6 +83,21 @@ class User:
     def reset(self, coordinate):
         """ Reset user position """
         self.coordinate = np.array(coordinate, dtype=float)
+        
+    def update_coordinate(self, distance_delta_d, direction_fai):
+        """
+        used in function move to update UAV cordinate
+        """
+        delta_x = distance_delta_d * math.cos(direction_fai)
+        delta_y = distance_delta_d * math.sin(direction_fai)
+        self.coordinate[0] += delta_x
+        self.coordinate[1] += delta_y
+
+    def move(self, distance_delta_d, direction_fai):
+        """
+        preform the 2D movement every step
+        """
+        self.update_coordinate(distance_delta_d, direction_fai)
 
 class Attacker:
     """
