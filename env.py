@@ -240,6 +240,46 @@ class MiniSystem:
     
         return comprehensive_channel_elements_list + UAV_position_list
 
+    def store_current_system_sate(self):
+        """
+        Stores the current system state, including beamforming matrix, 
+        reflecting coefficients, UAV position, capacities, and power usage.
+        """
+        # 1. Store beamforming matrix (flattened real & imaginary parts)
+        G_flat = self.UAV.G.flatten()
+        self.data_manager.store_data(G_flat.tolist(), 'beamforming_matrix')
+    
+        # 2. Store reflecting coefficient matrix (diagonal values only)
+        if self.RIS.Phi is not None:
+            diag_elements = np.diag(self.RIS.Phi)
+            self.data_manager.store_data(diag_elements.tolist(), 'reflecting_coefficient')
+        else:
+            self.data_manager.store_data([], 'reflecting_coefficient')
+    
+        # 3. Store UAV state (x, y position)
+        self.data_manager.store_data(list(map(float, self.UAV.coordinate[:2])), 'UAV_state')
+    
+        # 4. Store user capacity (secure and normal)
+        user_capacities = [user.secure_capacity for user in self.user_list] + \
+                          [user.capacity for user in self.user_list]
+        self.data_manager.store_data(user_capacities, 'user_capacities_combined')
+    
+        # 5. Store G power info (transmit power and power max)
+        transmit_power = float(np.trace(self.UAV.G @ self.UAV.G.conj().T))
+        G_power_info = [transmit_power, self.UAV.G_Pmax]
+        self.data_manager.store_data(G_power_info, 'G_power')
+    
+        # 6. Store individual user capacity
+        user_caps = [user.capacity for user in self.user_list]
+        self.data_manager.store_data(user_caps, 'user_capacity')
+    
+        # 7. Store attacker capacities
+        attacker_caps = [attacker.capacity for attacker in self.attacker_list]
+        self.data_manager.store_data(attacker_caps, 'attacker_capacity')
+    
+        # 8. Store secure capacities
+        secure_caps = [user.secure_capacity for user in self.user_list]
+        self.data_manager.store_data(secure_caps, 'secure_capacity')
 
     
     def update_channel_capacity(self):
