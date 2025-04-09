@@ -10,13 +10,15 @@ class DataManager(object):
     Before use, please create a directory under the current file path: './data'
     It must include the file 'init_location.xlsx' which contains positions of all entities.
     """
+
     def __init__(self, store_list=None, file_path='./data', store_path='./data/storage'):
         # 1. Initialize storage
         if store_list is None:
-            store_list = ['beamforming_matrix', 'reflecting_coefficient', 'UAV_state', 'user_capacity', 'jammer']
+            store_list = ['beamforming_matrix', 'reflecting_coefficient', 'UAV_state', 'user_capacity']
         self.store_list = store_list
 
         # 2. Read location file
+
         self.init_data_file = os.path.join(file_path, 'init_location.xlsx')
 
         # 3. Setup unique storage folder with timestamp
@@ -34,6 +36,8 @@ class DataManager(object):
         """
         filename = os.path.join(self.store_path, f'simulation_result_ep_{episode_cnt}.mat')
         scipy.io.savemat(filename, {f'result_{episode_cnt}': self.simulation_result_dic})
+
+
         self.simulation_result_dic = {}
         self.init_format()
 
@@ -58,7 +62,7 @@ class DataManager(object):
         valid_entities = ['user', 'attacker', 'RIS', 'RIS_norm_vec', 'UAV']
         if entity_type not in valid_entities:
             raise ValueError(f"'{entity_type}' is not a valid entity type. Must be one of {valid_entities}")
-        
+
         df = pd.read_excel(self.init_data_file, sheet_name=entity_type)
         return np.array([df.at[index, 'x'], df.at[index, 'y'], df.at[index, 'z']])
 
@@ -69,4 +73,5 @@ class DataManager(object):
         """
         if value_name not in self.simulation_result_dic:
             self.simulation_result_dic[value_name] = []
+
         self.simulation_result_dic[value_name].append(row_data)
