@@ -17,7 +17,7 @@ class DataManager:
         :param store_list: List of variables to store in simulation results.
         """
         self.store_list = store_list or ['beamforming_matrix', 'reflecting_coefficient',
-                                         'UAV_state', 'user_capacity', 'jamming_power']
+                                         'UAV_state', 'user_capacity', 'jamming_power', 'UAV_movement']
         
         self.init_data_file = os.path.join(file_path, 'init_location.xlsx')
         
