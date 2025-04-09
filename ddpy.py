@@ -282,8 +282,8 @@ class Agent(object):
         return mu_prime.cpu().detach().numpy()
 
 
-    def remember(self, state, action, reward, new_state, done):
-        self.memory.store_transition(state, action, reward, new_state, done)
+    def remember(self, state, action, reward, new_state, done, jamming_effect):
+        self.memory.store_transition(state, action, reward, new_state, done, jamming_effect)
 
     def learn(self):
         if self.memory.mem_cntr < self.batch_size:
