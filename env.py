@@ -219,23 +219,32 @@ class MiniSystem:
 
     def reward(self):
         """
-        used in function step to get the reward of current step
+        Computes the reward at the current step.
+        Rewards depend on beamforming power and secure capacity vs. eavesdropper capacity.
         """
-        reward = 0
-        reward_ = 0
-        P = np.trace(self.UAV.G * self.UAV.G.H)
-        if abs(P) > abs(self.UAV.G_Pmax) :
-            reward = abs(self.UAV.G_Pmax) - abs(P)
-            reward /= self.power_factor 
+        reward = 0.0
+        penalty = 0.0
+    
+        # Compute current transmission power
+        G_matrix = np.array(self.UAV.G)
+        power_used = np.trace(G_matrix @ G_matrix.conj().T).real
+    
+        # Penalize if power exceeds max allowed
+        if abs(power_used) > abs(self.UAV.G_Pmax):
+            reward = (abs(self.UAV.G_Pmax) - abs(power_used)) / self.power_factor
         else:
             for user in self.user_list:
-                r = user.capacity - max(self.eavesdrop_capacity_array[:, user.index])
-                if r < user.QoS_constrain:
-                    reward_ += r - user.QoS_constrain
+                # Calculate difference between capacity and eavesdropper max capacity
+                secrecy_margin = user.capacity - np.max(self.eavesdrop_capacity_array[:, user.index])
+    
+                if secrecy_margin < user.QoS_constrain:
+                    penalty += secrecy_margin - user.QoS_constrain
                 else:
-                    reward += r/(self.user_num*2)
-            if reward_ < 0:
-                reward = reward_ * self.user_num * 10
+                    reward += secrecy_margin / (self.user_num * 2)
+    
+            if penalty < 0:
+                reward = penalty * self.user_num * 10
+    
         return reward
     
     def observe(self):
