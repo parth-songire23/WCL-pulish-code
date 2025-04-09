@@ -13,7 +13,7 @@ class DataManager(object):
     def __init__(self, store_list=None, file_path='./data', store_path='./data/storage'):
         # 1. Initialize storage
         if store_list is None:
-            store_list = ['beamforming_matrix', 'reflecting_coefficient', 'UAV_state', 'user_capacity']
+            store_list = ['beamforming_matrix', 'reflecting_coefficient', 'UAV_state', 'user_capacity', 'jammer']
         self.store_list = store_list
 
         # 2. Read location file
