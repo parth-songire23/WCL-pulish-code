@@ -217,6 +217,26 @@ class MiniSystem:
     
         return new_state, reward, done, []
 
+    def reward(self):
+        """
+        used in function step to get the reward of current step
+        """
+        reward = 0
+        reward_ = 0
+        P = np.trace(self.UAV.G * self.UAV.G.H)
+        if abs(P) > abs(self.UAV.G_Pmax) :
+            reward = abs(self.UAV.G_Pmax) - abs(P)
+            reward /= self.power_factor 
+        else:
+            for user in self.user_list:
+                r = user.capacity - max(self.eavesdrop_capacity_array[:, user.index])
+                if r < user.QoS_constrain:
+                    reward_ += r - user.QoS_constrain
+                else:
+                    reward += r/(self.user_num*2)
+            if reward_ < 0:
+                reward = reward_ * self.user_num * 10
+        return reward
     
     def observe(self):
         """
