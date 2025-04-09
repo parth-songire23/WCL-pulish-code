@@ -58,7 +58,7 @@ class DataManager:
         """
         Stores simulation data (e.g., beamforming, capacity, jamming power).
         """
-        # if value_name not in self.simulation_result_dic:
-        #     raise KeyError(f"'{value_name}' is not a valid storage key.")
+        if value_name not in self.simulation_result_dic:
+            raise KeyError(f"'{value_name}' is not a valid storage key.")
         
         self.simulation_result_dic[value_name].append(row_data)
