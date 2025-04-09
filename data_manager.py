@@ -25,7 +25,7 @@ class DataManager:
         self.store_path = os.path.join(store_path, self.timestamp)
         os.makedirs(self.store_path, exist_ok=True)
         
-        self.simulation_result_dic = {key: [] for key in self.store_list}
+        self.simulation_result_dic = {}
 
     def save_file(self, episode_cnt=0):
         """
@@ -35,7 +35,7 @@ class DataManager:
         scipy.io.savemat(file_name, {f'result_{episode_cnt}': self.simulation_result_dic})
         
         # Reset storage for the next episode
-        self.simulation_result_dic = {key: [] for key in self.store_list}
+        self.simulation_result_dic = {}
 
     def save_meta_data(self, meta_dic):
         """
