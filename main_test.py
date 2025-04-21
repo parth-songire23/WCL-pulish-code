@@ -21,7 +21,7 @@ system = MiniSystem(
 )
 
 # 2. Training Parameters
-episode_num = 10
+episode_num = 200
 step_num = 100
 episode_cnt = 0
 
