@@ -122,7 +122,7 @@ while episode_cnt < episode_num:
         agent_2.save_models()
 
 # Run plot generation after training
-from plot_and_load import LoadAndPlot  # <- change this to the actual filename of your plotting script, e.g., plot_and_load.py
+from plot_and_load import load_and_plot.py  # <- change this to the actual filename of your plotting script, e.g., plot_and_load.py
 
 # Instantiate and run the plotting utility
 plot_obj = LoadAndPlot(
