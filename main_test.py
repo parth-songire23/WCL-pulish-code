@@ -120,3 +120,17 @@ while episode_cnt < episode_num:
     if episode_cnt % 10 == 0:
         agent_1.save_models()
         agent_2.save_models()
+
+# Run plot generation after training
+from plot_and_load import LoadAndPlot  # <- change this to the actual filename of your plotting script, e.g., plot_and_load.py
+
+# Instantiate and run the plotting utility
+plot_obj = LoadAndPlot(
+    store_path=f"./data/mannal_store/{system.data_manager.timestamp}/",  # <- make sure this matches where your `.mat` files are saved
+    user_num=system.user_num,
+    attacker_num=system.attacker_num,
+    RIS_ant_num=system.RIS.ant_num
+)
+
+plot_obj.plot()
+plot_obj.restruct()
