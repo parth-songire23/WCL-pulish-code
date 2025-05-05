@@ -20,9 +20,10 @@ class LoadAndPlot:
         file_path = os.path.join(self.store_path, file_name)
         return loadmat(file_path)
 
-    def load_all_steps(self, ep_num=100):
-        """Load all episodes and extract relevant metrics."""
+    def load_all_steps(self):
         print(f"Loading data from: {self.store_path}")
+        all_files = sorted([f for f in os.listdir(self.store_path) if f.startswith("simulation_result_ep_") and f.endswith(".mat")])
+        ep_num = len(all_files)
 
         result_dic = {
             'reward': [],
@@ -81,6 +82,10 @@ class LoadAndPlot:
 
     def _plot_metric(self, key, title, ylabel, filename):
         """Helper function to plot different metrics."""
+
+        if not isinstance(self.all_steps[key][0], list):
+        self.all_steps[key] = [self.all_steps[key]]
+
         plt.figure(title)
         for i, data in enumerate(self.all_steps[key]):
             plt.plot(data, label=f"{key.capitalize()} {i}", color=self.color_list[i % len(self.color_list)])
