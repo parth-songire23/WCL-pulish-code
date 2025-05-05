@@ -84,7 +84,7 @@ class LoadAndPlot:
         """Helper function to plot different metrics."""
 
         if not isinstance(self.all_steps[key][0], list):
-        self.all_steps[key] = [self.all_steps[key]]
+            self.all_steps[key] = [self.all_steps[key]]
 
         plt.figure(title)
         for i, data in enumerate(self.all_steps[key]):
