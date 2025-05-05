@@ -22,13 +22,13 @@ system = MiniSystem(
 )
 
 # 2. Training Parameters
-episode_num = 6000
+episode_num = 1000
 step_num = 100
 episode_cnt = 0
 
 # 3. Define RL Agents for UAV and RIS
 agent_params = {
-    "alpha": 0.001,
+    "alpha": 0.0001,
     "beta": 0.001,
     "tau": 0.001,
     "batch_size": 64,
