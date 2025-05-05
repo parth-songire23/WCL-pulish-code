@@ -110,7 +110,17 @@ while episode_cnt < episode_num:
         if done:
             break
 
-    # Save Episode Results
+    episode_result = {
+        "reward": [score_per_ep],  # can also add per-step reward list if available
+        "user_capacity": system.get_user_capacity_log(),
+        "secure_capacity": system.get_secure_capacity_log(),
+        "attacker_capacity": system.get_attacker_capacity_log(),
+        "reflecting_coefficient": system.get_RIS_log()
+    }
+    
+    # 2. Save episode results
+    
+    system.data_manager.update(episode_result)
     system.data_manager.save_file(episode_cnt=episode_cnt)
     print(f"Episode {episode_cnt}: Score = {score_per_ep:.2f}")
 
