@@ -115,17 +115,17 @@ while episode_cnt < episode_num:
     system.data_manager.save_file(episode_cnt=episode_cnt)
     print(f"Episode {episode_cnt}: Score = {score_per_ep:.2f}")
     
-    csv_file = "scores.csv"
+    # csv_file = "scores.csv"
 
-    # Check if file exists to write header only once
-    file_exists = os.path.isfile(csv_file)
+    # # Check if file exists to write header only once
+    # file_exists = os.path.isfile(csv_file)
 
-    # Write the episode and score to the CSV file
-    with open(csv_file, mode='a', newline='') as file:
-        writer = csv.writer(file)
-        if not file_exists:
-            writer.writerow(["Episode", "Score"])  # write header if file is new
-        writer.writerow([episode_cnt, round(score_per_ep, 2)])
+    # # Write the episode and score to the CSV file
+    # with open(csv_file, mode='a', newline='') as file:
+    #     writer = csv.writer(file)
+    #     if not file_exists:
+    #         writer.writerow(["Episode", "Score"])  # write header if file is new
+    #     writer.writerow([episode_cnt, round(score_per_ep, 2)])
 
     episode_cnt += 1
 
