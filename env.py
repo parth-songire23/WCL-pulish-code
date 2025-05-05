@@ -203,7 +203,12 @@ class MiniSystem:
         new_state = self.observe()
     
         # 7. Calculate reward
-        reward = math.tanh(self.reward())
+        secure_capacity = self.secure_capacity_total  # this should already be updated in update_channel_capacity()
+        # transmit_power = float(np.trace(self.UAV.G @ self.UAV.G.conj().T).real)
+        jamming_penalty = 0  # Placeholder; adjust if you compute jamming effect separately
+        
+        raw_reward = self.compute_reward(secure_capacity, transmit_power, jamming_penalty)
+        reward = math.tanh(raw_reward)
     
         # 8. Check boundary conditions
         done = False
@@ -216,6 +221,15 @@ class MiniSystem:
         self.data_manager.store_data([reward], 'reward')
     
         return new_state, reward, done, []
+
+    def compute_reward(self, secure_capacity, transmit_power, jamming_penalty=0.0):
+        """
+        Compute the reward as a weighted combination of secure capacity, power cost, and jamming.
+        """
+        power_penalty = 0.01 * transmit_power  # tune this factor as needed
+        reward = secure_capacity - power_penalty - jamming_penalty
+        return reward
+
 
     def reward(self):
         """
