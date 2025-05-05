@@ -243,7 +243,7 @@ class MiniSystem:
                     reward += secrecy_margin / (self.user_num * 2)
     
             if penalty < 0:
-                reward = penalty/100 * self.user_num * 10
+                reward = penalty/75 * self.user_num * 10
     
         return reward
     
@@ -291,7 +291,7 @@ class MiniSystem:
         # 4. Store user capacity (secure and normal)
         user_capacities = [user.secure_capacity for user in self.user_list] + \
                           [user.capacity for user in self.user_list]
-        self.data_manager.store_data(user_capacities, 'user_capacity')
+        self.data_manager.store_data(user_capacities, 'user_capacities_combined')
     
         # 5. Store G power info (transmit power and power max)
         transmit_power = float(np.trace(self.UAV.G @ self.UAV.G.conj().T))
