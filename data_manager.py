@@ -79,7 +79,7 @@ class DataManager:
         """
         Reads initial location data from 'init_location.xlsx'.
         """
-        valid_entities = {'user', 'attacker', 'RIS', 'RIS_norm_vec', 'UAV', 'jammer'}
+        valid_entities = {'user', 'attacker', 'RIS', 'RIS_norm_vec', 'UAV', 'jammer', 'user_capacities_combined'}
         if entity_type not in valid_entities:
             raise ValueError(f"Invalid entity type: {entity_type}. Must be one of {valid_entities}")
 
