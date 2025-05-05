@@ -3,6 +3,7 @@ import scipy.io
 import pandas as pd
 import os
 import time
+from scipy.io import savemat
 
 class DataManager:
     """
