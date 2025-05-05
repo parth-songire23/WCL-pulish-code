@@ -291,7 +291,7 @@ class MiniSystem:
         # 4. Store user capacity (secure and normal)
         user_capacities = [user.secure_capacity for user in self.user_list] + \
                           [user.capacity for user in self.user_list]
-        self.data_manager.store_data(user_capacities, 'user_capacities_combined')
+        self.data_manager.store_data(user_capacities, 'user_capacity')
     
         # 5. Store G power info (transmit power and power max)
         transmit_power = float(np.trace(self.UAV.G @ self.UAV.G.conj().T))
