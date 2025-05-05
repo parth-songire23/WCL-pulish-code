@@ -294,7 +294,7 @@ class MiniSystem:
         self.data_manager.store_data(user_capacities, 'user_capacities_combined')
     
         # 5. Store G power info (transmit power and power max)
-        transmit_power = float(np.trace(self.UAV.G @ self.UAV.G.conj().T))
+        transmit_power = float(np.trace(self.UAV.G @ self.UAV.G.conj().T).real)
         G_power_info = [transmit_power, self.UAV.G_Pmax]
         self.data_manager.store_data(G_power_info, 'G_power')
     
