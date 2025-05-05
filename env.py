@@ -243,7 +243,7 @@ class MiniSystem:
                     reward += secrecy_margin / (self.user_num * 2)
     
             if penalty < 0:
-                reward = penalty * self.user_num * 10
+                reward = penalty/100 * self.user_num * 10
     
         return reward
     
