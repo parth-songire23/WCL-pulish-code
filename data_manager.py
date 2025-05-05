@@ -18,7 +18,7 @@ class DataManager:
         """
         self.store_list = ['beamforming_matrix', 'reflecting_coefficient','UAV_state', 'user_capacities_combined', 'G_power', 'user_capacity', 'jamming_power', 'UAV_movement', 'attacker_capacity', 'reward', 'secure_capacity']
         
-        # self.init_data_file = os.path.join(file_path, 'init_location.xlsx')
+        self.init_data_file = os.path.join(file_path, 'init_location.xlsx')
         
         self.timestamp = time.strftime('%Y-%m-%d_%H-%M-%S', time.localtime())
         self.store_path = os.path.join(store_path, self.timestamp)
